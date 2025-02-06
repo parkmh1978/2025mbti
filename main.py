@@ -5,12 +5,7 @@ import pandas as pd
 import plotly.express as px
 
 # 데이터 로드
-df = pd.read_csv("countriesMBTI.csv")
-
-# MBTI 유형 단순화 (-T, -A 제거)
-mbti_mapping = {col: col[:-2] for col in df.columns if col not in ["Country"]}
-df.rename(columns=mbti_mapping, inplace=True)
-df = df.groupby("Country", as_index=False).sum()
+df = pd.read_csv("countriesMBTI_16types.csv")
 
 # 앱 제목 (이모지 활용)
 st.title("🌍 국가별 MBTI 성향 분석 🔍")
