@@ -8,18 +8,15 @@ import plotly.express as px
 df = pd.read_csv("countriesMBTI.csv")
 
 # MBTI 유형 단순화 (-T, -A 제거)
-df.columns = [col[:-2] if col not in ["Country"] else col for col in df.columns]
+mbti_mapping = {col: col[:-2] for col in df.columns if col not in ["Country"]}
+df.rename(columns=mbti_mapping, inplace=True)
 df = df.groupby("Country", as_index=False).sum()
-
-# 숫자형 변환 (문자열 변환 후 처리)
-for col in df.columns[1:]:
-    df[col] = pd.to_numeric(df[col].astype(str), errors='coerce')
 
 # 앱 제목 (이모지 활용)
 st.title("🌍 국가별 MBTI 성향 분석 🔍")
 
 # 국가 선택
-global_mbti_types = df.columns[1:].tolist()
+global_mbti_types = sorted(set(df.columns) - {"Country"})
 country = st.selectbox("🌏 국가를 선택하세요:", df["Country"].unique())
 
 # 선택한 국가의 MBTI 분포 시각화 (내림차순 정렬 및 마우스 오버 시 퍼센트 표시)
