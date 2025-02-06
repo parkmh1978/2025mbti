@@ -11,6 +11,10 @@ df = pd.read_csv("countriesMBTI.csv")
 df.columns = [col[:-2] if col not in ["Country"] else col for col in df.columns]
 df = df.groupby("Country", as_index=False).sum()
 
+# 숫자형 변환
+for col in df.columns[1:]:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
+
 # 앱 제목 (이모지 활용)
 st.title("🌍 국가별 MBTI 성향 분석 🔍")
 
@@ -22,7 +26,6 @@ country = st.selectbox("🌏 국가를 선택하세요:", df["Country"].unique()
 st.subheader(f"📊 {country}의 MBTI 분포")
 selected_data = df[df["Country"] == country].iloc[:, 1:].T
 selected_data.columns = [country]
-selected_data[country] = selected_data[country].astype(float)  # 데이터 타입 변환
 selected_data = selected_data.sort_values(by=country, ascending=False)
 fig = px.bar(selected_data, x=selected_data.index, y=country, text=selected_data[country],
              title=f"{country}의 MBTI 분포", labels={country: "비율"},
@@ -43,17 +46,20 @@ target_mbti = st.selectbox("💡 MBTI 유형을 선택하세요:", global_mbti_t
 st.subheader(f"🏆 {target_mbti} 비율이 높은 국가 TOP 10 & 한국")
 
 if target_mbti in df.columns:
-    top_10 = df.nlargest(10, target_mbti)[["Country", target_mbti]].copy()
-    korea_value = df[df["Country"] == "South Korea"][target_mbti].values[0] if "South Korea" in df["Country"].values else None
+    try:
+        top_10 = df.nlargest(10, target_mbti)[["Country", target_mbti]].copy()
+        korea_value = df[df["Country"] == "South Korea"][target_mbti].values[0] if "South Korea" in df["Country"].values else None
+        
+        if korea_value is not None:
+            korea_data = pd.DataFrame({"Country": ["South Korea"], target_mbti: [korea_value]})
+            top_10 = pd.concat([top_10, korea_data])
 
-    if korea_value is not None:
-        korea_data = pd.DataFrame({"Country": ["South Korea"], target_mbti: [korea_value]})
-        top_10 = pd.concat([top_10, korea_data])
-
-    top_10 = top_10.sort_values(by=target_mbti, ascending=False)
-    fig_top = px.bar(top_10, x="Country", y=target_mbti, text=target_mbti, color="Country",
-                     color_discrete_map={"South Korea": "red"}, title=f"{target_mbti} 비율 TOP 10 & 한국",
-                     labels={target_mbti: "비율"}, hover_data={target_mbti: ':,.2f'})
-    st.plotly_chart(fig_top)
+        top_10 = top_10.sort_values(by=target_mbti, ascending=False)
+        fig_top = px.bar(top_10, x="Country", y=target_mbti, text=target_mbti, color="Country",
+                         color_discrete_map={"South Korea": "red"}, title=f"{target_mbti} 비율 TOP 10 & 한국",
+                         labels={target_mbti: "비율"}, hover_data={target_mbti: ':,.2f'})
+        st.plotly_chart(fig_top)
+    except Exception as e:
+        st.error(f"데이터를 불러오는 중 오류 발생: {e}")
 else:
     st.error("선택한 MBTI 유형이 데이터에 존재하지 않습니다.")
