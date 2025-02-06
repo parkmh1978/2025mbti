@@ -11,9 +11,9 @@ df = pd.read_csv("countriesMBTI.csv")
 df.columns = [col[:-2] if col not in ["Country"] else col for col in df.columns]
 df = df.groupby("Country", as_index=False).sum()
 
-# 숫자형 변환
+# 숫자형 변환 (문자열 변환 후 처리)
 for col in df.columns[1:]:
-    df[col] = pd.to_numeric(df[col], errors='coerce')
+    df[col] = pd.to_numeric(df[col].astype(str), errors='coerce')
 
 # 앱 제목 (이모지 활용)
 st.title("🌍 국가별 MBTI 성향 분석 🔍")
