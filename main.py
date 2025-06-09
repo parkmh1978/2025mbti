@@ -12,7 +12,7 @@ for col in df.columns[1:]:
     df[col] = (df[col] * 100).round(2)
 
 # 앱 제목 (이모지 활용)
-st.header("🧑🏻‍💻 쪼랩 바이브 코딩 스터디와 함께하는! 👩🏻‍💻")
+st.header("🧑🏻‍💻서울고 석리송 선생님과 함께하는! 👩🏻‍💻")
 st.title("🌍 국가별 MBTI 성향 분석 프로젝트 🔍")
 
 # 국가 선택
